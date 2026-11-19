@@ -1,0 +1,6 @@
+ignored: []
+trustedRegistries:
+  - docker.io
+  - public.ecr.aws
+strict-labels: false
+failure-threshold: warning

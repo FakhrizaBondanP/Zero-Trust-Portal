@@ -1,0 +1,20 @@
+rules:
+  - id: detect-sql-injection-concatenation
+    patterns:
+      - pattern: $POOL.query("..." + $VAR + "...")
+      - pattern: $POOL.query(`...${$VAR}...`)
+    message: "Potensi SQL Injection! Gunakan parameterized query ($1, $2) pada pool.query()."
+    languages: [javascript]
+    severity: ERROR
+
+  - id: forbid-dangerous-eval
+    pattern: eval(...)
+    message: "Penggunaan eval() dilarang keras karena berisiko Remote Code Execution (RCE)."
+    languages: [javascript]
+    severity: ERROR
+
+  - id: detect-hardcoded-aws-key
+    pattern-regex: 'AKIA[0-9A-Z]{16}'
+    message: "Terdeteksi AWS Access Key ID hardcoded di dalam kode! Gunakan IAM Role / OIDC."
+    languages: [generic]
+    severity: ERROR

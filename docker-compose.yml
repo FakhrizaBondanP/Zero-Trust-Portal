@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    container_name: zt-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-portal_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-localdevpassword}
+      POSTGRES_DB: ${DB_NAME:-portal_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal_user -d portal_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend-net
+
+  backend:
+    build:
+      context: ./app/backend
+    image: zero-trust-backend:v1.0.0
+    container_name: zt-backend
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-portal_user}
+      DB_PASSWORD: ${DB_PASSWORD:-localdevpassword}
+      DB_NAME: ${DB_NAME:-portal_db}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend-net
+      - frontend-net
+
+  frontend:
+    build:
+      context: ./app/frontend
+    image: zero-trust-frontend:v1.0.0
+    container_name: zt-frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend-net
+
+volumes:
+  pgdata:
+
+networks:
+  frontend-net:
+  backend-net:
+    internal: true
