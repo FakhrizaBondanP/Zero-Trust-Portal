@@ -2,3 +2,9 @@ node_modules/
 .env
 *.log
 sbom-*.json
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
